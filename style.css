@@ -1,0 +1,30 @@
+:root { --bg:#111; --fg:#eee; }
+* { box-sizing: border-box; }
+html, body { height: 100%; margin: 0; }
+body { background: var(--bg); color: var(--fg); font-family: system-ui, Arial, sans-serif; }
+#app {
+  height: 100%;
+  display: grid;
+  place-items: center;
+  padding: 16px;
+}
+#note {
+  max-width: 96vw;
+  max-height: 85vh;
+  display: block;
+  user-select: none;
+  -webkit-user-drag: none;
+  touch-action: manipulation; /* more responsive taps */
+}
+#hud {
+  position: fixed;
+  top: 10px;
+  left: 50%;
+  transform: translateX(-50%);
+  opacity: 0.85;
+  background: rgba(255,255,255,0.08);
+  padding: 8px 12px;
+  border-radius: 12px;
+  font-size: 14px;
+  pointer-events: none;
+}
