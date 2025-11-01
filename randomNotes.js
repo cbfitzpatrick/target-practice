@@ -29,16 +29,16 @@
     }
   
     function showRandom() {
-      const f = pickRandom();
-      if (!f) return;
-      last = f;
-  
-      const src = notesUrl(f);
-      const tmp = new Image();
-      tmp.onload = () => { img.src = src; };
-      tmp.src = src;
-  
-      hud.textContent = f;
+        const f = pickRandom();
+        if (!f) return;
+        last = f;
+      
+        const src = notesUrl(f);
+        const tmp = new Image();
+        tmp.onload = () => { img.src = src; };
+        tmp.src = src;
+      
+        // no HUD filename text
     }
   
     function isSpace(e) {
