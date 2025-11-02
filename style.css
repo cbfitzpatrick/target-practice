@@ -1,4 +1,4 @@
-:root { --bg:#111; --fg:#eee; --muted:#999; --panel:#1b1b1b; --accent:#2e7; }
+:root { --bg:#111; --fg:#eee; --muted:#b0b0b0; --panel:#1b1b1b; }
 * { box-sizing: border-box; }
 html, body { height: 100%; margin: 0; }
 body { background: var(--bg); color: var(--fg); font-family: system-ui, Arial, sans-serif; }
@@ -12,48 +12,65 @@ body { background: var(--bg); color: var(--fg); font-family: system-ui, Arial, s
   gap: 14px;
 }
 
+/* ---- Controls panel ---- */
 #controls {
   width: min(900px, 95vw);
   display: grid;
-  grid-template-columns: 1fr 1fr auto;
+  grid-template-columns: 1fr 1fr auto; /* desktop/tablet */
   gap: 10px;
   background: var(--panel);
-  padding: 10px;
+  padding: 12px;
   border-radius: 12px;
   box-shadow: 0 2px 12px rgba(0,0,0,.3);
+  overflow: hidden;           /* keep children clipped within */
 }
+
+#controls > * { min-width: 0; } /* allow grid items to shrink properly */
 
 #controls .row {
   display: grid;
   grid-template-columns: 90px 1fr;
   gap: 8px;
   align-items: center;
+  min-width: 0;
 }
 
-label { color: var(--muted); font-size: 14px; }
+label { color: var(--muted); font-size: 14px; white-space: nowrap; }
+
 select, button {
-  height: 36px;
+  height: 40px;
   border-radius: 8px;
   border: 1px solid #333;
   background: #161616;
   color: var(--fg);
   padding: 0 10px;
   font-size: 14px;
+  width: 100%;
+  min-width: 0;              /* critical for mobile overflow */
 }
-button { background: #193; border: 1px solid #173; cursor: pointer; }
+
+button { cursor: pointer; }
 button:hover { filter: brightness(1.05); }
 button:disabled { opacity: .6; cursor: not-allowed; }
 
+/* ---- Presets row ---- */
 #presets {
   width: min(900px, 95vw);
   display: flex;
   gap: 10px;
   flex-wrap: wrap;
 }
+
 .preset {
   background: #1a1a1a;
   border: 1px solid #2a2a2a;
+  padding: 8px 10px;
+  height: 40px;
+  border-radius: 8px;
+  flex: 1 1 260px;           /* wrap nicely across lines */
+  min-width: 0;
 }
+
 .preset:hover { filter: brightness(1.06); }
 
 .preset.toggle[aria-pressed="true"] {
@@ -62,6 +79,7 @@ button:disabled { opacity: .6; cursor: not-allowed; }
   box-shadow: inset 0 0 0 1px #2b5;
 }
 
+/* ---- Image ---- */
 #note {
   max-width: 96vw;
   max-height: 80vh;
@@ -71,6 +89,41 @@ button:disabled { opacity: .6; cursor: not-allowed; }
   touch-action: manipulation;
 }
 
-#hud {
-  display: none; /* hidden, kept for any future status text */
+/* Hidden HUD but keep for future status */
+#hud { display: none; }
+
+/* =========================
+   Mobile & small tablets
+   ========================= */
+@media (max-width: 680px) {
+
+  /* Stack controls vertically */
+  #controls {
+    grid-template-columns: 1fr;   /* single column */
+    gap: 12px;
+  }
+
+  /* Put label above the select to save horizontal space */
+  #controls .row {
+    grid-template-columns: 1fr;   /* label on its own line */
+    gap: 6px;
+  }
+
+  label { font-size: 13px; }
+
+  select, button {
+    height: 42px;
+    font-size: 15px;
+  }
+
+  /* Presets: full-width buttons that wrap cleanly */
+  #presets { gap: 8px; }
+  .preset { flex: 1 1 100%; }     /* each preset takes full width */
+}
+
+/* Ultra-narrow devices */
+@media (max-width: 360px) {
+  #app { padding: 10px; gap: 10px; }
+  #controls { padding: 10px; }
+  select, button { font-size: 14px; height: 40px; }
 }
