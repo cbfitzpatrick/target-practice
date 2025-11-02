@@ -12,7 +12,7 @@
     const presetsEl = document.getElementById("presets");
   
     // --- Show startup image until a setting is picked ---
-    const STARTUP_IMAGE = "lsd obama lq.png"; // in site root (same folder as index.html)
+    const STARTUP_IMAGE = "shako buzz.png"; // in site root (same folder as index.html)
     img.src = encodeURIComponent(STARTUP_IMAGE);
   
     // --- State ---

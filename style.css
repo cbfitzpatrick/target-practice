@@ -4,32 +4,31 @@ html, body { height: 100%; margin: 0; }
 body { background: var(--bg); color: var(--fg); font-family: system-ui, Arial, sans-serif; }
 
 #app {
-  height: 100%;
+  min-height: 100%;
   display: grid;
   grid-template-rows: auto auto 1fr auto;
-  place-items: center;
-  padding: 16px;
+  justify-items: center;
   gap: 14px;
+  padding: 16px;
 }
 
-/* ---- Controls panel ---- */
+/* ---------- Controls panel ---------- */
 #controls {
   width: min(900px, 95vw);
   display: grid;
-  grid-template-columns: 1fr 1fr auto; /* desktop/tablet */
+  grid-template-columns: minmax(0,1fr) minmax(0,1fr) auto; /* desktop/tablet */
   gap: 10px;
   background: var(--panel);
   padding: 12px;
   border-radius: 12px;
   box-shadow: 0 2px 12px rgba(0,0,0,.3);
-  overflow: hidden;           /* keep children clipped within */
+  overflow: hidden;              /* clip children */
 }
-
-#controls > * { min-width: 0; } /* allow grid items to shrink properly */
+#controls > * { min-width: 0; }  /* allow shrinking */
 
 #controls .row {
   display: grid;
-  grid-template-columns: 90px 1fr;
+  grid-template-columns: 90px minmax(0,1fr);
   gap: 8px;
   align-items: center;
   min-width: 0;
@@ -46,40 +45,36 @@ select, button {
   padding: 0 10px;
   font-size: 14px;
   width: 100%;
-  min-width: 0;              /* critical for mobile overflow */
+  min-width: 0;                 /* critical for mobile overflow */
 }
-
 button { cursor: pointer; }
 button:hover { filter: brightness(1.05); }
 button:disabled { opacity: .6; cursor: not-allowed; }
 
-/* ---- Presets row ---- */
+/* ---------- Presets row ---------- */
 #presets {
   width: min(900px, 95vw);
   display: flex;
-  gap: 10px;
   flex-wrap: wrap;
+  gap: 10px;
 }
-
 .preset {
   background: #1a1a1a;
   border: 1px solid #2a2a2a;
   padding: 8px 10px;
   height: 40px;
   border-radius: 8px;
-  flex: 1 1 260px;           /* wrap nicely across lines */
+  flex: 1 1 260px;              /* wraps nicely */
   min-width: 0;
 }
-
 .preset:hover { filter: brightness(1.06); }
-
 .preset.toggle[aria-pressed="true"] {
   background: #254;
   border-color: #2b5;
   box-shadow: inset 0 0 0 1px #2b5;
 }
 
-/* ---- Image ---- */
+/* ---------- Image ---------- */
 #note {
   max-width: 96vw;
   max-height: 80vh;
@@ -89,77 +84,67 @@ button:disabled { opacity: .6; cursor: not-allowed; }
   touch-action: manipulation;
 }
 
-/* Hidden HUD but keep for future status */
+/* Hidden HUD kept for future status */
 #hud { display: none; }
 
 /* =========================
    Mobile & small tablets
    ========================= */
-   @media (max-width: 680px) {
+@media (max-width: 680px) {
 
-    /* Stack the whole page vertically, in DOM order */
-    #app {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 10px;
-    }
-  
-    /* Controls panel: single column, label above select, full width */
-    #controls {
-      width: 95vw;
-      max-width: 900px;
-      display: grid;
-      grid-template-columns: 1fr;   /* one column */
-      gap: 12px;
-      padding: 10px;
-      position: relative;
-      z-index: 2;                   /* stay above anything else */
-    }
-  
-    #controls .row {
-      grid-template-columns: 1fr;   /* label on its own line */
-      gap: 6px;
-    }
-  
-    label { font-size: 13px; }
-  
-    select, button {
-      height: 42px;
-      font-size: 15px;
-      width: 100%;
-      min-width: 0;
-    }
-  
-    /* Presets sit UNDER the controls, with clear spacing */
-    #presets {
-      width: 95vw;
-      max-width: 900px;
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-      margin-top: 4px;
-      position: relative;
-      z-index: 1;                   /* behind controls if they ever overlap */
-    }
-  
-    .preset {
-      flex: 1 1 100%;               /* full-width buttons for easy tapping */
-      height: 42px;
-      padding: 8px 10px;
-    }
-  
-    /* Image scales and uses remaining space, never overlaps panels */
-    #note {
-      max-width: 96vw;
-      max-height: 70vh;             /* a bit shorter to leave room for UI */
-    }
+  /* Stack vertically in DOM order: Controls → Presets → Image */
+  #app {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    padding: 12px;
   }
-  
-  /* Ultra-narrow devices */
-  @media (max-width: 360px) {
-    #app { gap: 8px; }
-    #controls { padding: 8px; }
-    select, button, .preset { height: 40px; font-size: 14px; }
+
+  /* Controls: single column, label on its own line */
+  #controls {
+    width: 95vw;
+    max-width: 900px;
+    grid-template-columns: 1fr;
+    gap: 12px;
+    padding: 10px;
   }
-  
+
+  #controls .row {
+    grid-template-columns: 1fr;  /* label above select */
+    gap: 6px;
+  }
+
+  label { font-size: 13px; }
+
+  select, button {
+    height: 44px;
+    font-size: 15px;
+    width: 100%;
+    min-width: 0;
+  }
+
+  /* Presets: full-width buttons that wrap */
+  #presets {
+    width: 95vw;
+    max-width: 900px;
+    gap: 8px;
+    margin-top: 2px;
+  }
+  .preset {
+    flex: 1 1 100%;
+    height: 44px;
+  }
+
+  /* Slightly smaller image to leave room for UI */
+  #note {
+    max-height: 70vh;
+  }
+}
+
+/* Ultra-narrow devices */
+@media (max-width: 360px) {
+  #app { gap: 8px; }
+  #controls { padding: 8px; }
+  select, button, .preset { height: 40px; font-size: 14px; }
+}
