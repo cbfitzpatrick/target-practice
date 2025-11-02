@@ -8,6 +8,8 @@
     const beginnerBtn = document.getElementById("beginnerBtn");
     const proBtn = document.getElementById("proBtn");
     const naturalsBtn = document.getElementById("naturalsBtn");
+    const controlsEl = document.getElementById("controls");
+    const presetsEl = document.getElementById("presets");
   
     // --- Show startup image until a setting is picked ---
     const STARTUP_IMAGE = "lsd obama lq.png"; // in site root (same folder as index.html)
@@ -103,28 +105,29 @@
       return (e.code === "Space") || (e.key === " " || e.key === "Spacebar") || (e.keyCode === 32);
     }
   
+    // Ignore clicks/taps inside the interactive panels
+    function isInControlArea(evt) {
+      const t = evt.target;
+      return !!(t && (t.closest?.("#controls") || t.closest?.("#presets")));
+    }
+  
     // --- Enharmonic display label for dropdowns (e.g., F#3/Gb3) ---
     function enharmonicLabelForMidi(midi) {
       const pc = midi % 12;
       const oct = Math.floor(midi / 12) - 1;
   
-      // Naturals: 0,2,4,5,7,9,11
       const NAT_LETTERS = { 0:"C", 2:"D", 4:"E", 5:"F", 7:"G", 9:"A", 11:"B" };
       if (pc in NAT_LETTERS) return `${NAT_LETTERS[pc]}${oct}`;
   
-      // Accidentals: pcs 1,3,6,8,10 -> (sharpName/flatName)
-      // Sharp spelling letters for these pcs:
       const PC_TO_SHARP = { 1:"C", 3:"D", 6:"F", 8:"G", 10:"A" }; // + '#'
-      // Flat spelling letters for these pcs:
       const PC_TO_FLAT  = { 1:"D", 3:"E", 6:"G", 8:"A", 10:"B" }; // + 'b'
       const sharp = `${PC_TO_SHARP[pc]}#${oct}`;
       const flat  = `${PC_TO_FLAT[pc]}b${oct}`;
-      return `${sharp}/${flat}`; // e.g., F#3/Gb3
+      return `${sharp}/${flat}`;
     }
   
     // --- Build selectors from available files ---
     function populateRangeSelectors(items) {
-      // Build set of available MIDI values (so dropdowns reflect your actual files)
       const midsSet = new Set(items.map(it => it.midi));
       const mids = [...midsSet].sort((a,b) => a-b);
   
@@ -142,14 +145,12 @@
         highSel.appendChild(mkOption(m));
       });
   
-      // default to full available range
       lowSel.value = String(mids[0]);
       highSel.value = String(mids[mids.length - 1]);
     }
   
     // --- Helpers for presets ---
     function midiOf(name) {
-      // Accept "C4", "G5", "F#3", "Fs3"
       const m = /^([A-G])([sb#]?)(\d)$/.exec(name);
       if (!m) return null;
       const L = m[1].toUpperCase();
@@ -194,18 +195,24 @@
     // --- Events ---
     window.addEventListener("keydown", (e) => {
       if (!started) return;
+      // If focus is inside an input/select/button, let the UI handle Space
+      const tag = (document.activeElement?.tagName || "").toLowerCase();
+      if (["input", "select", "button", "textarea"].includes(tag)) return;
+  
       if (isSpace(e)) { e.preventDefault(); debouncedShowRandom(); }
     });
   
     let touchHandled = false;
     window.addEventListener("touchstart", (e) => {
       if (!started) return;
+      if (isInControlArea(e)) return; // ignore taps on controls/presets
       touchHandled = true;
       debouncedShowRandom();
     }, { passive: true });
   
     window.addEventListener("click", (e) => {
       if (!started) return;
+      if (isInControlArea(e)) return; // ignore clicks on controls/presets
       if (touchHandled) { touchHandled = false; return; }
       debouncedShowRandom();
     }, { passive: true });
