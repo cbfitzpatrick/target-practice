@@ -3,13 +3,31 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no" />
-  <title>Target Practice v1</title>
+  <title>Random Notes</title>
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
   <main id="app">
-    <div id="hud">Tap anywhere or press SPACE</div>
+    <div id="controls">
+      <div class="row">
+        <label for="lowNote">Lowest</label>
+        <select id="lowNote"></select>
+      </div>
+      <div class="row">
+        <label for="highNote">Highest</label>
+        <select id="highNote"></select>
+      </div>
+      <button id="startBtn" aria-label="Start randomizer">Start</button>
+    </div>
+
+    <div id="presets">
+      <button id="beginnerBtn" class="preset">Beginner (C4–G5)</button>
+      <button id="proBtn" class="preset">Professional (F♯3–C6)</button>
+      <button id="naturalsBtn" class="preset toggle" aria-pressed="false">Naturals only</button>
+    </div>
+
     <img id="note" alt="random note" />
+    <div id="hud" aria-live="polite"></div>
   </main>
 
   <script src="randomNotes.js"></script>
