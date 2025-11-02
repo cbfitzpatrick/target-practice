@@ -95,35 +95,71 @@ button:disabled { opacity: .6; cursor: not-allowed; }
 /* =========================
    Mobile & small tablets
    ========================= */
-@media (max-width: 680px) {
+   @media (max-width: 680px) {
 
-  /* Stack controls vertically */
-  #controls {
-    grid-template-columns: 1fr;   /* single column */
-    gap: 12px;
+    /* Stack the whole page vertically, in DOM order */
+    #app {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+    }
+  
+    /* Controls panel: single column, label above select, full width */
+    #controls {
+      width: 95vw;
+      max-width: 900px;
+      display: grid;
+      grid-template-columns: 1fr;   /* one column */
+      gap: 12px;
+      padding: 10px;
+      position: relative;
+      z-index: 2;                   /* stay above anything else */
+    }
+  
+    #controls .row {
+      grid-template-columns: 1fr;   /* label on its own line */
+      gap: 6px;
+    }
+  
+    label { font-size: 13px; }
+  
+    select, button {
+      height: 42px;
+      font-size: 15px;
+      width: 100%;
+      min-width: 0;
+    }
+  
+    /* Presets sit UNDER the controls, with clear spacing */
+    #presets {
+      width: 95vw;
+      max-width: 900px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 4px;
+      position: relative;
+      z-index: 1;                   /* behind controls if they ever overlap */
+    }
+  
+    .preset {
+      flex: 1 1 100%;               /* full-width buttons for easy tapping */
+      height: 42px;
+      padding: 8px 10px;
+    }
+  
+    /* Image scales and uses remaining space, never overlaps panels */
+    #note {
+      max-width: 96vw;
+      max-height: 70vh;             /* a bit shorter to leave room for UI */
+    }
   }
-
-  /* Put label above the select to save horizontal space */
-  #controls .row {
-    grid-template-columns: 1fr;   /* label on its own line */
-    gap: 6px;
+  
+  /* Ultra-narrow devices */
+  @media (max-width: 360px) {
+    #app { gap: 8px; }
+    #controls { padding: 8px; }
+    select, button, .preset { height: 40px; font-size: 14px; }
   }
-
-  label { font-size: 13px; }
-
-  select, button {
-    height: 42px;
-    font-size: 15px;
-  }
-
-  /* Presets: full-width buttons that wrap cleanly */
-  #presets { gap: 8px; }
-  .preset { flex: 1 1 100%; }     /* each preset takes full width */
-}
-
-/* Ultra-narrow devices */
-@media (max-width: 360px) {
-  #app { padding: 10px; gap: 10px; }
-  #controls { padding: 10px; }
-  select, button { font-size: 14px; height: 40px; }
-}
+  
