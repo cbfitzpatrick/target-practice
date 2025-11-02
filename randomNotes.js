@@ -16,6 +16,19 @@
     let started = false;
     let naturalsOnly = false;
   
+    // Weighted picking: naturals get 1.2x weight vs accidentals
+    const NATURAL_WEIGHT = 1.2;
+    const ACCIDENTAL_WEIGHT = 1.0;
+    let weights = [];        // parallel to active
+    let totalWeight = 0;
+  
+    function recomputeWeights() {
+      if (!active.length) { weights = []; totalWeight = 0; return; }
+      // If naturalsOnly is on, everything is natural anyway → uniform weights OK
+      weights = active.map(it => naturalsOnly ? 1 : (it.acc === 0 ? NATURAL_WEIGHT : ACCIDENTAL_WEIGHT));
+      totalWeight = weights.reduce((a, b) => a + b, 0);
+    }
+  
     // Debounce to avoid double fire on mobile taps
     const DEBOUNCE_MS = 300;
     let lastTrigger = 0;
@@ -27,7 +40,7 @@
     }
   
     // Parse filename → pitch info
-    // Accept "Cs4.png", "Db5-1.png", "F#3-1.png", "A4.png", "Fs4.png"
+    // Accept "Cs4.png", "Db5-1.png", "F#3-1.png", "Fs4.png", "A4.png"
     function parseFileToPitch(fileName) {
       const m = /^([A-G])([sb#]?)(\d)(?:[-_].*)?\.png$/i.exec(fileName);
       if (!m) return null;
@@ -49,20 +62,33 @@
     }
   
     function notesUrl(filename) {
-      // Files were renamed web-safe; if any still contain '#', encode
       return "notes/" + (filename.includes("#") ? encodeURIComponent(filename) : filename);
     }
   
-    function pickRandom() {
+    // Weighted random pick with “no immediate repeat” preference
+    function pickWeighted() {
       if (!active.length) return null;
       if (active.length === 1) return active[0];
-      let item;
-      do { item = active[(Math.random() * active.length) | 0]; } while (last && item.file === last.file);
-      return item;
+  
+      // Try a few times to avoid repeating the last shown item
+      for (let attempt = 0; attempt < 5; attempt++) {
+        const r = Math.random() * totalWeight;
+        let cum = 0;
+        for (let i = 0; i < active.length; i++) {
+          cum += weights[i];
+          if (r <= cum) {
+            const chosen = active[i];
+            if (!last || chosen.file !== last.file || attempt === 4) return chosen;
+            break; // try again if same as last
+          }
+        }
+      }
+      // Fallback (shouldn't really happen)
+      return active[(Math.random() * active.length) | 0];
     }
   
     function showRandom() {
-      const item = pickRandom();
+      const item = pickWeighted();
       if (!item) return;
       last = item;
   
@@ -119,13 +145,10 @@
     }
   
     function setSelectorsToRange(lowMidi, highMidi) {
-      // Clamp to available values present in selectors
       const optsLow = [...lowSel.options].map(o => Number(o.value));
       const optsHigh = [...highSel.options].map(o => Number(o.value));
       const lowVal = optsLow.reduce((best, v) => (v <= lowMidi && v > best ? v : best), -Infinity);
       const highVal = optsHigh.reduce((best, v) => (v >= highMidi && v < best ? v : best), Infinity);
-  
-      // If exact not found, fallback to closest available
       lowSel.value = String(Number.isFinite(lowVal) ? lowVal : optsLow[0]);
       highSel.value = String(Number.isFinite(highVal) ? highVal : optsHigh[optsHigh.length - 1]);
     }
@@ -141,6 +164,9 @@
       active = allItems.filter(it =>
         it.midi >= low && it.midi <= high && (!naturalsOnly || it.acc === 0)
       );
+  
+      // Recompute weights whenever the pool changes
+      recomputeWeights();
   
       started = true;
       showRandom();
@@ -186,7 +212,7 @@
     naturalsBtn.addEventListener("click", () => {
       naturalsOnly = !naturalsOnly;
       naturalsBtn.setAttribute("aria-pressed", String(naturalsOnly));
-      if (started) applyRange(); // re-filter current range
+      applyRange(); // re-filter + recompute weights
     });
   
     // --- Load list and initialize UI ---
@@ -205,7 +231,7 @@
           return;
         }
         populateRangeSelectors(allItems);
-        // Wait for user to press Start or a preset
+        // Wait for user to press Start or choose a preset
       })
       .catch(() => {
         hud.style.display = "block";
