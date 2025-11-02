@@ -9,6 +9,11 @@
     const proBtn = document.getElementById("proBtn");
     const naturalsBtn = document.getElementById("naturalsBtn");
   
+    // --- Show startup image until a setting is picked ---
+    const STARTUP_IMAGE = "lsd obama lq.png"; // in site root (same folder as index.html)
+    // encode spaces/specials so the browser requests the correct URL
+    img.src = encodeURIComponent(STARTUP_IMAGE);
+  
     // --- State ---
     let allItems = [];   // [{file, midi, label, acc}] acc: -1 flat, 0 natural, 1 sharp
     let active = [];     // filtered by chosen range (+ naturals filter if enabled)
@@ -83,7 +88,7 @@
           }
         }
       }
-      // Fallback (shouldn't really happen)
+      // Fallback
       return active[(Math.random() * active.length) | 0];
     }
   
@@ -168,6 +173,7 @@
       // Recompute weights whenever the pool changes
       recomputeWeights();
   
+      // Flip to "started" and show the first random note (replacing startup image)
       started = true;
       showRandom();
       startBtn.textContent = "Apply";
@@ -175,19 +181,19 @@
   
     // --- Events ---
     window.addEventListener("keydown", (e) => {
-      if (!started) return;
+      if (!started) return; // ignore keys until a setting is picked
       if (isSpace(e)) { e.preventDefault(); debouncedShowRandom(); }
     });
   
     let touchHandled = false;
     window.addEventListener("touchstart", (e) => {
-      if (!started) return;
+      if (!started) return; // ignore taps until a setting is picked
       touchHandled = true;
       debouncedShowRandom();
     }, { passive: true });
   
     window.addEventListener("click", (e) => {
-      if (!started) return;
+      if (!started) return; // ignore clicks until a setting is picked
       if (touchHandled) { touchHandled = false; return; }
       debouncedShowRandom();
     }, { passive: true });
@@ -215,7 +221,7 @@
       applyRange(); // re-filter + recompute weights
     });
   
-    // --- Load list and initialize UI ---
+    // --- Load list and initialize UI (keeps startup image visible until started) ---
     fetch("image_list.json", { cache: "no-store" })
       .then(r => r.json())
       .then(list => {
@@ -231,7 +237,7 @@
           return;
         }
         populateRangeSelectors(allItems);
-        // Wait for user to press Start or choose a preset
+        // Do not start automatically; keep startup image until user picks settings
       })
       .catch(() => {
         hud.style.display = "block";
